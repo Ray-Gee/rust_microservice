@@ -4,7 +4,7 @@ use agql::{
 };
 use async_graphql as agql;
 use async_graphql_rocket::{GraphQLQuery, GraphQLRequest, GraphQLResponse};
-use model::{mutation::MutationRoot, query::QueryRoot, WikitSchema};
+use model::{mutation::Mutation, query::QueryRoot, WikitSchema};
 use rocket::{response::content, State};
 use sqlx::postgres::PgPoolOptions;
 
@@ -33,7 +33,7 @@ async fn rocket() -> _ {
         .connect("postgres:///wikit_dev")
         .await
         .unwrap();
-    let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
+    let schema = Schema::build(QueryRoot, Mutation, EmptySubscription)
         .data(pool)
         .finish();
     rocket::build().manage(schema).mount(

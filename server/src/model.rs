@@ -1,4 +1,4 @@
-use self::mutation::MutationRoot;
+use self::mutation::Mutation;
 use crate::{db::PageRecord, model::query::QueryRoot};
 use agql::{EmptySubscription, Object, Schema};
 use async_graphql as agql;
@@ -8,7 +8,7 @@ use pulldown_cmark::{html, Options, Parser};
 pub mod mutation;
 pub mod query;
 
-pub type WikitSchema = Schema<QueryRoot, MutationRoot, EmptySubscription>;
+pub type WikitSchema = Schema<QueryRoot, Mutation, EmptySubscription>;
 
 impl From<PageRecord> for Page {
     fn from(

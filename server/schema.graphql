@@ -23,7 +23,7 @@ type PageRevision {
     createTime: String!
 }
 
-type MutationRoot {
+type Mutation {
     createPage(input: CreatePageInput!) : Page!
     updatePageBody(input: UpdatePageBodyInput!) : Page!
 }
