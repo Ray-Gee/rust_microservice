@@ -1,9 +1,11 @@
 import type { GetServerSidePropsContext, NextPage } from "next";
-import { Page } from "../generated/graphql";
-import { sdk } from "../src/client";
+import { Page } from "../../generated/graphql";
+import { sdk } from "../../src/client";
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const data = await sdk.getPageByTitle({ title: "Home" });
+  const { title } = context.params!;
+  const titleString = (title as string[]).join("/");
+  const data = await sdk.getPageByTitle({ title: titleString });
   const page = data.pageByTitle;
   return {
     props: {
@@ -12,7 +14,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
   };
 }
 
-const Home: NextPage<{ page: Page }> = ({ page }) => {
+const Page: NextPage<{ page: Page }> = ({ page }) => {
   return (
     <>
       <h1>{page.title}</h1>
@@ -21,4 +23,4 @@ const Home: NextPage<{ page: Page }> = ({ page }) => {
   );
 };
 
-export default Home;
+export default Page;

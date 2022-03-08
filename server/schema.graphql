@@ -13,7 +13,7 @@ type Page {
     bodyHtml: String!
     revisions: [PageRevision!]
     createTime: String!
-    updateTime: String!
+    updateTime: String
 }
 
 type PageRevision {
