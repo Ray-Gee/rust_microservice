@@ -1,0 +1,7 @@
+query searchPage($query: String!) {
+  searchPage(query: $query) {
+    id
+    title
+    source
+  }
+}

@@ -1,6 +1,7 @@
 use self::mutation::Mutation;
 use crate::{db::PageRecord, model::query::QueryRoot};
 use agql::{EmptySubscription, Object, Schema};
+use ammonia::clean;
 use async_graphql as agql;
 use chrono::NaiveDateTime;
 use pulldown_cmark::{html, Options, Parser};
@@ -29,7 +30,7 @@ impl From<PageRecord> for Page {
         }
     }
 }
-
+#[allow(dead_code)]
 #[derive(Debug)]
 struct Page {
     id: i32,
@@ -49,13 +50,24 @@ impl Page {
         &self.title
     }
 
+    async fn source(&self) -> &str {
+        &self.source
+    }
+
     async fn body_html(&self) -> Result<String, agql::Error> {
         let mut options = Options::empty();
         options.insert(Options::ENABLE_STRIKETHROUGH);
         let parser = Parser::new_ext(&self.source, options);
-        let mut html_output = String::new();
-        html::push_html(&mut html_output, parser);
+        let mut unsafe_html = String::new();
+        html::push_html(&mut unsafe_html, parser);
+        let safe_html = clean(&*unsafe_html);
+        Ok(safe_html)
+    }
 
-        Ok(html_output)
+    async fn create_time(&self) -> NaiveDateTime {
+        self.create_time
+    }
+    async fn update_time(&self) -> NaiveDateTime {
+        self.update_time
     }
 }

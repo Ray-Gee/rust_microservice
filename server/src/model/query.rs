@@ -43,4 +43,18 @@ impl QueryRoot {
         let page = page_record.map(Into::into);
         Ok(page)
     }
+
+    async fn search_page(
+        &self,
+        ctx: &async_graphql::Context<'_>,
+        query: String,
+    ) -> Result<Vec<Page>, agql::Error> {
+        let pool = ctx.data::<PgPool>()?;
+        let sql =
+            "select id, title, source, create_time, update_time from pages where &@~ $1 limit 20;";
+        let page_records: Vec<PageRecord> =
+            sqlx::query_as(sql).bind(&query).fetch_all(pool).await?;
+        let pages = page_records.into_iter().map(Into::into).collect();
+        Ok(pages)
+    }
 }
