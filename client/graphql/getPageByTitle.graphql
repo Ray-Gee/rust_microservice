@@ -4,5 +4,12 @@ query getPageByTitle($title: String!) {
         title
         bodyHtml
         source
+        createTime
+        updateTime
+        hatenaStars {
+            id
+            quote
+            color
+        }
     }
 }

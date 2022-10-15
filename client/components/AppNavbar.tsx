@@ -3,6 +3,7 @@ import { IconNames } from "@blueprintjs/icons";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useState } from "react";
+import { sdk } from "../src/client";
 
 export type AppNavbarProps = {
   query?: string;
@@ -22,9 +23,10 @@ export const AppNavbar: React.VFC<AppNavbarProps> = ({ query }) => {
       <Navbar.Group align={Alignment.RIGHT}>
         <Link passHref href="/new_page">
           <AnchorButton minimal icon={IconNames.DOCUMENT}>
-            新しいページ
+            ページを作る
           </AnchorButton>
         </Link>
+        <imFeelingLucky />
       </Navbar.Group>
     </Navbar>
   );
@@ -63,5 +65,22 @@ const SearchBox: React.VFC<SearchBoxProps> = (props) => {
         onSubmit={handleSearchBoxSubmit}
       />
     </form>
+  );
+};
+
+const ImFeelingLuckyButton: React.VFC = () => {
+  const handleClick = useCallback(async () => {
+    const data = await sdk.imFeelingLucky();
+    const title = data.imFeelingLucky.title;
+    // router.push({
+    //   pathname: "/pages/[title]",
+    //   query: { title },
+    // });
+    location.href = `/pages/${title}`;
+  }, []);
+  return (
+    <Button minimal onClick={handleClick}>
+      I&apos;m Feeling Lucky
+    </Button>
   );
 };

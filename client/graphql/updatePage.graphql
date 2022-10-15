@@ -4,5 +4,7 @@ mutation updatePage($id: Int!, $title: String, $source: String) {
         title
         bodyHtml
         source
+        createTime
+        updateTime
     }
 }

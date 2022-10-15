@@ -1,10 +1,14 @@
 use self::mutation::Mutation;
-use crate::{db::PageRecord, model::query::QueryRoot};
-use agql::{EmptySubscription, Object, Schema};
+use crate::{
+    db::{HatenaStarRecord, PageRecord},
+    model::query::QueryRoot,
+};
+use agql::{EmptySubscription, Object, Schema, SimpleObject};
 use ammonia::clean;
 use async_graphql as agql;
 use chrono::NaiveDateTime;
 use pulldown_cmark::{html, Options, Parser};
+use sqlx::PgPool;
 
 pub mod mutation;
 pub mod query;
@@ -69,5 +73,54 @@ impl Page {
     }
     async fn update_time(&self) -> NaiveDateTime {
         self.update_time
+    }
+
+    async fn hatena_stars(&self, ctx: &agql::Context<'_>) -> Result<Vec<HatenaStar>, agql::Error> {
+        let pool = ctx.data::<PgPool>()?;
+        let sql = "
+        select
+            id
+            , page_id
+            , quote
+            , color
+        from
+            hatena_stars
+        where
+            page_id = $1
+        ";
+        let hatena_stars: Vec<HatenaStarRecord> =
+            sqlx::query_as(sql).bind(self.id).fetch_all(pool).await?;
+        Ok(hatena_stars.into_iter().map(Into::into).collect())
+    }
+}
+
+#[derive(SimpleObject)]
+pub struct DeletedPage {
+    id: i32,
+}
+
+#[derive(SimpleObject)]
+pub struct HatenaStar {
+    id: i32,
+    page_id: i32,
+    quote: Option<String>,
+    color: i32,
+}
+
+impl From<HatenaStarRecord> for HatenaStar {
+    fn from(
+        HatenaStarRecord {
+            id,
+            page_id,
+            quote,
+            color,
+        }: HatenaStarRecord,
+    ) -> Self {
+        Self {
+            id,
+            page_id,
+            quote,
+            color,
+        }
     }
 }

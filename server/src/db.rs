@@ -9,3 +9,11 @@ pub struct PageRecord {
     pub create_time: NaiveDateTime,
     pub update_time: NaiveDateTime,
 }
+
+#[derive(Debug, FromRow)]
+pub struct HatenaStarRecord {
+    pub id: i32,
+    pub page_id: i32,
+    pub quote: Option<String>,
+    pub color: i32,
+}

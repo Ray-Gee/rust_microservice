@@ -1,7 +1,16 @@
-query searchPage($query: String!) {
-  searchPage(query: $query) {
-    id
-    title
-    source
+query searchPage($query: String!, $after: String) {
+  searchPage(query: $query, after: $after, first: 1) {
+    pageInfo {
+      hasPreviousPage
+      hasNextPage
+    }
+    edges {
+      cursor
+      node {
+        id
+        title
+        source
+      }
+    }
   }
 }

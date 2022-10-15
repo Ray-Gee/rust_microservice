@@ -2,7 +2,12 @@ use agql::{InputObject, Object};
 use async_graphql as agql;
 use sqlx::PgPool;
 
-use crate::{db::PageRecord, model::Page};
+use crate::{
+    db::{HatenaStarRecord, PageRecord},
+    model::Page,
+};
+
+use super::{DeletedPage, HatenaStar};
 
 #[derive(InputObject)]
 pub struct CreatePageInput {
@@ -15,6 +20,17 @@ pub struct UpdatePageInput {
     id: i32,
     title: Option<String>,
     source: Option<String>,
+}
+#[derive(InputObject)]
+pub struct DeletePageInput {
+    id: i32,
+}
+
+#[derive(InputObject)]
+pub struct GiveHatenaStarInput {
+    page_id: i32,
+    quote: Option<String>,
+    color: i32,
 }
 
 pub struct Mutation;
@@ -155,5 +171,48 @@ impl Mutation {
         tx.commit().await?;
         let gpl_page = page_record.map(Into::into);
         Ok(gpl_page)
+    }
+
+    async fn delete_page(
+        &self,
+        ctx: &agql::Context<'_>,
+        input: DeletePageInput,
+    ) -> Result<Option<DeletedPage>, agql::Error> {
+        let pool = ctx.data::<PgPool>()?;
+        let mut tx = pool.begin().await?;
+        let sql = "delete from pages where id = $1;";
+        let result = sqlx::query(sql).bind(input.id).execute(&mut tx).await?;
+        if result.rows_affected() == 0 {
+            return Ok(None);
+        }
+        let sql = "delete from page_revisions where page_id = $1";
+        sqlx::query(sql).bind(input.id).execute(&mut tx).await?;
+        tx.commit().await?;
+        Ok(Some(DeletedPage { id: input.id }))
+    }
+
+    async fn give_hatena_star(
+        &self,
+        ctx: &agql::Context<'_>,
+        input: GiveHatenaStarInput,
+    ) -> Result<HatenaStar, agql::Error> {
+        let pool = ctx.data::<PgPool>()?;
+        let sql = "
+            insert into hatena_stars (
+                page_id, quote, color
+            )
+            values (
+                $1, $2, $3
+            )
+            returning
+                id, page_id, quote, color
+        ";
+        let hatena_star: HatenaStarRecord = sqlx::query_as(sql)
+            .bind(input.page_id)
+            .bind(input.quote)
+            .bind(input.color)
+            .fetch_one(pool)
+            .await?;
+        Ok(hatena_star.into())
     }
 }

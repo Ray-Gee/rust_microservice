@@ -15,3 +15,6 @@ chrono = "0.4"
 pulldown-cmark = "0.9"
 rocket_cors = {git = "https://github.com/lawliet89/rocket_cors", branch = "master"}
 ammonia = "3"
+
+[profile.release]
+panic = "abort"

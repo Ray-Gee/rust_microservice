@@ -1,0 +1,8 @@
+mutation giveHatenaStar($pageId: Int!, $quote: String, $color: Int!) {
+  giveHatenaStar(input: { pageId: $pageId, quote: $quote, color: $color }) {
+    id
+    pageId
+    quote
+    color
+  }
+}
